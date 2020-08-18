@@ -1,0 +1,709 @@
+
+
+Skip to content
+Using Gmail with screen readers
+	You’re out of storage space and will soon be unable to send or receive emails until you free up space or purchase additional storage. Changes to your storage space may take up to 24 hours to update.
+in:sent jasmine.kaur1677@gmail.com 
+Meet
+Hangouts
+
+1 of 34
+NLP Assignment
+Inbox
+x
+
+Arun Kumar <arun.kaloniya@gmail.com>
+Attachments
+Thu, May 21, 7:51 PM
+to Jasmine
+
+Hi Jasmine,
+
+Here is complete NLP assignment. 
+
+Cheers!!
+Arun 
+Attachments area
+
+Jasmine Kaur <jasmine.kaur1677@gmail.com>
+Fri, May 22, 12:43 PM
+to me
+
+Good Job Sir 😊
+
+Thanks a lot.Haha, thanks!Thank you!
+
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 23 21:33:31 2020
+
+@author: JAS
+"""
+
+# NLP Assignment on stackoverflow posts 
+
+import pandas as pd 
+
+
+# this code require open internet connection
+# else manually download and import the csv file 
+
+Input=pd.read_csv("https://storage.googleapis.com/tensorflow-workshop-examples/stack-overflow-data.csv")
+
+
+'''
+Create a dataframe with two columns ‘post’ and ‘tag’. check the head, info, and describe methods on the
+dataframe
+'''
+
+# Checking required methods 
+
+
+Input['tags'].value_counts()
+
+
+
+Input.head(10)
+
+Input.info()
+
+Input.describe()
+
+# to check missing values within columsns()
+Input.isnull().sum()
+
+#Making a test data to try out different things 
+
+
+
+#test=Input.head(1000).copy() # First 1000 observations to test the the entire processing 
+
+
+
+test=Input.copy() # You can set your input as per you needs 
+
+
+
+test['test_low']=test['post'].str.lower() # put entire column into lowercase
+
+
+
+# Tasks to achieve 
+
+'''
+The dataset has two columns. ‘post’ column consists of the different posts which are registered on stack
+overflow. ‘tags’ column represents the language which the post is related to. Number of rows: 40,000
+
+Create a dataframe with two columns ‘post’ and ‘tag’. check the head, info, and describe methods on the
+dataframe
+Remove punctuations and stopwords from the text in ‘post’ column
+Create two objects X and y. X will be the ' post’ column of the above dataframe and y will be the ' tag'
+column. Create a CountVectorizer object and split the data into training and testing sets. Train a
+MultinomialNB model for classifying the tag label of reviews and Display the confusion Matrix
+
+
+Display the HMM POS tagging on the first 4 rows of ‘post’
+5. Parse the first 4 rows of ‘post’ using Viterbi Parser [Use toy_pcfg1 and toy_pcfg2 to get the
+probabilistic context free grammars; use the PCFG suitable for each sentence]
+
+'''
+
+
+
+# now challenge is when we are removing the punctuations marks then 
+# scripting language identifier like C# and (.) in ASP.net would make in complicated 
+
+
+
+# Manipulating the important keywords to another form 
+
+test["tags1"]= test["post"].str.replace("#", "sharp", case = False) 
+test["tags1"]= test["tags1"].str.replace(r'\.net', 'dotnet', case=False)
+test["tags1"]= test["tags1"].str.replace("objective-c", "objectiveC", case = False)
+test["tags1"]= test["tags1"].str.replace(r"\+", "plus", case = False)
+
+
+# test["tags1"]=test["post"].str.replace('#', 'sharp').replace('asp.net', 'aspdotnet').replace('objective-c', 'objectiveC').replace('.net', 'dotnet').replace(r"\+", "plus")
+
+
+
+
+# Creating list for the tags to remove from the string 
+html_head=["<pre>","<code>","</code>","</pre>"]
+
+
+for x in html_head:
+    test["tags1"]= test["tags1"].str.replace(x, " ", case = False)
+
+
+# Removing punctuations and digits from the string 
+import string
+def remove_punctuations(text):
+    for punctuation in (string.punctuation+"0123456789"): #adding numbers to remove from string
+        text = text.replace(punctuation, ' ')
+    return text
+
+test["tags2"] = test["tags1"].apply(remove_punctuations)
+
+
+# Removing html tags 
+test["tags2"]= test["tags2"].str.replace(r'https?://\S+|www\.\S+', " ", case = False)
+
+
+
+
+
+
+
+# Converting extra spaces to single space 
+test["tags3"] = test["tags2"].str.replace(r'\s+', ' ')
+
+# converting single letter to space 
+test["tags3"] = test["tags2"].str.replace(r'\b\w\b', ' ') 
+
+
+
+# Implementing left trim and right trim on the string 
+test["tags3"]= test["tags3"].str.lstrip()
+
+
+
+test["tags3"]= test["tags3"].str.rstrip()
+
+
+
+
+# Removing the stopwords 
+
+
+from nltk.stem.snowball import SnowballStemmer
+sno = SnowballStemmer('english')
+
+# implementing this to keep only english language words only 
+from nltk.corpus import stopwords
+stop_words = set(stopwords.words('english'))
+
+
+
+# removing stopwords 
+test['tags4']=test["tags3"].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
+
+# test['tags5']=test["tags4"].apply(lambda x: ' '.join([word for word in x.split() if word in (sno.stem(word))]))
+
+
+
+# Still there were some other language contents so implemented english words 
+import re
+
+test['tags5']=[re.sub(r'[^a-zA-z]+',' ', i) for i in test['tags4']]
+
+
+# test['tags6']=test["tags5"].apply(lambda x: ' '.join([word for word in x.split() if word not in (re.match("[a-zA-z]+")]))
+
+
+# there are still some http tags that needs to removed 
+
+test["tags6"]= test["tags5"]
+
+
+
+test["tags6"]= test["tags6"].str.replace('http', " ", case = False)
+
+
+
+
+# Applying Non english words removals 
+
+
+# import nltk
+
+# words = set(nltk.corpus.words.words())
+
+# test['tags7']=test["tags6"].apply(lambda x: ' '.join(x for x in nltk.wordpunct_tokenize(x) if x.lower() in words or not x.isalpha()))    
+    
+test['tags7']=test["tags6"]  
+
+
+
+
+
+test.columns.values
+
+
+
+# Creating X & Y objects 
+X = test.iloc[ : ,   9 ].values # Aligning the final column string values 
+# Y = test.iloc[ : , 1 ].values
+
+
+
+# Creating CountVectorizer
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+
+count_vectorizer = CountVectorizer(binary=True, max_features=10000)
+
+
+data = count_vectorizer.fit_transform((X))
+
+
+print(len(count_vectorizer.get_feature_names()))
+
+print(type(data.toarray()))
+
+
+
+
+
+tag2=data.toarray()
+
+
+# Fianl BOW dataframe 
+PD_CV=pd.DataFrame(tag2, columns=count_vectorizer.get_feature_names())
+
+
+
+
+# PD_CV.describe()
+
+
+# counts=PD_CV['abc'].value_counts()[1]>1
+
+# PD_CV['around'].value_counts()[1]/(PD_CV['around'].value_counts()[0]+PD_CV['around'].value_counts()[1])
+
+# cols=list(PD_CV.columns)
+
+
+# Implementing non missing to missing percentage criterion to capture who's contribution
+# less than 1%
+
+feat=[]
+for x in list(PD_CV.columns):
+    # print(x)
+    # print(PD_CV[x].value_counts())
+    # print(PD_CV[x].value_counts()[1])
+    # print(PD_CV[x].value_counts()[0]+PD_CV[x].value_counts()[1])
+    if (PD_CV[x].value_counts()[1]/(PD_CV[x].value_counts()[0]+PD_CV[x].value_counts()[1]))<0.01:
+        feat.append(x)
+  
+    
+    
+# Removing the above features from the entire feature to avoid overfit 
+# Since we have used binary countvector then non need to normalize the data 
+    
+updated_feat=[i for i in list(count_vectorizer.get_feature_names()) if i not in feat]
+    
+    
+
+
+# Importing the libraries method to implement Multinomial NB Model 
+
+
+from sklearn.model_selection import train_test_split
+
+# Importing the label encoder to convert predicted values to encoded 
+from sklearn.preprocessing import LabelEncoder
+
+
+# this needs to be installed first if not availabel then use the following command to install
+# if you are using anaconda env -> conda install -c conda-forge category_encoders
+# elif pip install category_encoders
+
+
+from sklearn.preprocessing import LabelEncoder
+
+lb_make = LabelEncoder()
+test["encoded"] = lb_make.fit_transform(test["tags"])
+test[["encoded", "tags"]].head(11) # See here how tese vales have been changed 
+
+
+
+
+
+
+X = PD_CV[updated_feat].values # Creating final dependent features for model 
+
+
+test.columns.values
+Y = test.iloc[ : , 10 ].values # Creating final independent features for model
+
+
+
+
+
+
+
+# Splitting the data into Test and Train dataset in 70 to 30  
+
+X_train, X_test, Y_train, Y_test = train_test_split( X, Y, test_size = 0.3, random_state = 1)
+
+
+from sklearn.naive_bayes import MultinomialNB
+clf = MultinomialNB()
+clf.fit(X_train, Y_train)
+
+y_pred_class = clf.predict(X_test)
+
+# calculate accuracy of class predictions
+from sklearn import metrics
+metrics.accuracy_score(Y_test, y_pred_class) # Model Accuracy Score 
+
+
+metrics.confusion_matrix(Y_test, y_pred_class).shape # Confusion Matrix 
+
+
+
+
+# ==================== Logistic Regression ==========================
+
+from sklearn.linear_model import LogisticRegression
+
+# 2. instantiate a logistic regression model
+logreg = LogisticRegression()
+# 3. train the model using X_train_dtm
+%time logreg.fit(X_train, Y_train)
+
+
+
+
+
+y_pred_class = logreg.predict(X_test)
+
+y_pred_prob = logreg.predict_proba(X_test)[:, 1]
+y_pred_prob
+
+
+
+# calculate accuracy
+metrics.accuracy_score(Y_test, y_pred_class)
+
+
+
+
+
+#================================= POS Tagging ========================================
+
+# Input dataframe for the POS Tagging 
+tag_pos=Input.head(10).copy()
+
+
+
+
+tag_pos["tags1"]= tag_pos["post"].str.replace("#", "sharp", case = False) 
+tag_pos["tags1"]= tag_pos["tags1"].str.replace(r'\.net', 'dotnet', case=False)
+tag_pos["tags1"]= tag_pos["tags1"].str.replace("objective-c", "objectiveC", case = False)
+tag_pos["tags1"]= tag_pos["tags1"].str.replace(r"\+", "plus", case = False)
+
+
+
+# Creating list for the tags to remove from the string 
+html_head=["<pre>","<code>","</code>","</pre>"]
+
+
+for x in html_head:
+    tag_pos["tags1"]= tag_pos["tags1"].str.replace(x, " ", case = False)
+
+
+# Removing punctuations and digits from the string 
+import string
+def remove_punctuations(text):
+    for punctuation in (string.punctuation+"0123456789"): #adding numbers to remove from string
+        text = text.replace(punctuation, ' ')
+    return text
+
+tag_pos["tags2"] = tag_pos["tags1"].apply(remove_punctuations)
+
+tag_pos["tags2"] = tag_pos["tags2"].str.replace(r'\b\w\b', ' ') 
+
+
+
+
+# Removing html tags 
+tag_pos["tags2"]= tag_pos["tags2"].str.replace(r'https?://\S+|www\.\S+', " ", case = False)
+
+
+# Converting extra spaces to single space 
+tag_pos["tags3"] = tag_pos["tags2"].str.replace(r'\s+', ' ')
+
+
+tag_pos["tags3"] = tag_pos["tags2"].str.replace(r'\s+', ' ')
+
+
+tag_pos["tags3"]= tag_pos["tags3"].str.lstrip()
+
+
+
+tag_pos["tags3"]= tag_pos["tags3"].str.rstrip()
+
+tag_pos["tags3"].iloc[0]+"."
+for i,j in tag_pos.iterrows():
+    tag_pos["tags3"].iloc[i]=tag_pos["tags3"].iloc[i]+"."
+
+
+
+
+
+
+# from nltk.stem.snowball import SnowballStemmer
+# sno = SnowballStemmer('english')
+
+# # implementing this to keep only english language words only 
+# from nltk.corpus import stopwords
+# stop_words = set(stopwords.words('english'))
+
+
+
+# # removing stopwords 
+# # test['tags4']=test["tags3"].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
+
+# tag_pos['tags4']=tag_pos["tags3"].apply(lambda x: ' '.join([word for word in x.split() if word in (sno.stem(word))]))
+
+
+
+
+# import nltk
+
+# words = set(nltk.corpus.words.words())
+
+# tag_pos['tags5']=tag_pos["tags4"].apply(lambda x: ' '.join(x for x in nltk.wordpunct_tokenize(x) if x.lower() in words or not x.isalpha()))    
+    
+
+'''
+from nltk import word_tokenize, pos_tag, pos_tag_sents
+import pandas as pd
+
+texts = tag_pos["tags3"].tolist()
+tagged_texts = pos_tag_sents(map(word_tokenize, texts))
+tagged_texts
+
+
+
+X=tag_pos["tags3"].apply(word_tokenize).tolist()
+
+
+Y=pos_tag_sents( tag_pos["tags3"].apply(word_tokenize).tolist() )
+
+flat_list = [] # different tokenized words into one single list 
+for sublist in X:
+    for item in sublist:
+        flat_list.append(item)
+        
+flat_lags = [] # different pos_tags of words into one single list 
+for sublist in Y:
+    for item,z in sublist:
+        flat_lags.append(z) 
+'''
+
+
+
+#############################################################################################
+
+
+
+# Importing libraries
+import nltk
+import numpy as np
+import pandas as pd
+import random
+from sklearn.model_selection import train_test_split
+import pprint, time
+#download the treebank corpus from nltk
+nltk.download('treebank')
+
+#download the universal tagset from nltk
+nltk.download('universal_tagset')
+# reading the Treebank tagged sentences
+nltk_data = list(nltk.corpus.treebank.tagged_sents(tagset='universal'))
+
+#print the first two sentences along with tags
+print(nltk_data[:2])
+
+
+
+
+
+texts = tag_pos["tags3"]
+# tagged_texts = list((map(nltk.pos_tag_sents, texts),tagset='universal'))
+
+from nltk import word_tokenize, pos_tag, pos_tag_sents
+
+
+
+tagged_texts = list(pos_tag_sents(map(word_tokenize, texts),tagset='universal'))
+
+tagged_texts
+
+print(tagged_texts[:2])
+
+
+
+train_set,test_set =train_test_split(tagged_texts,train_size=0.80,test_size=0.20,random_state = 101)
+
+
+# create list of train and test tagged words
+train_tagged_words = [ tup for sent in train_set for tup in sent ]
+test_tagged_words = [ tup for sent in test_set for tup in sent ]
+print(len(train_tagged_words))
+print(len(test_tagged_words))
+
+
+
+#use set datatype to check how many unique tags are present in training data
+tags = {tag for word,tag in train_tagged_words}
+print(len(tags))
+print(tags)
+
+# check total words in vocabulary
+vocab = {word for word,tag in train_tagged_words}
+
+
+
+
+# compute Emission Probability
+def word_given_tag(word, tag, train_bag = train_tagged_words):
+    tag_list = [pair for pair in train_bag if pair[1]==tag]
+    count_tag = len(tag_list)#total number of times the passed tag occurred in train_bag
+    w_given_tag_list = [pair[0] for pair in tag_list if pair[0]==word]
+#now calculate the total number of times the passed word occurred as the passed tag.
+    count_w_given_tag = len(w_given_tag_list)
+
+    
+    return (count_w_given_tag, count_tag)
+
+
+
+
+
+# compute  Transition Probability
+def t2_given_t1(t2, t1, train_bag = train_tagged_words):
+    tags = [pair[1] for pair in train_bag]
+    count_t1 = len([t for t in tags if t==t1])
+    count_t2_t1 = 0
+    for index in range(len(tags)-1):
+        if tags[index]==t1 and tags[index+1] == t2:
+            count_t2_t1 += 1
+    return (count_t2_t1, count_t1)
+
+
+# creating t x t transition matrix of tags, t= no of tags
+# Matrix(i, j) represents P(jth tag after the ith tag)
+
+tags_matrix = np.zeros((len(tags), len(tags)), dtype='float32')
+for i, t1 in enumerate(list(tags)):
+    for j, t2 in enumerate(list(tags)): 
+        tags_matrix[i, j] = t2_given_t1(t2, t1)[0]/t2_given_t1(t2, t1)[1]
+
+print(tags_matrix)
+
+
+# convert the matrix to a df for better readability
+#the table is same as the transition table shown in section 3 of article
+tags_df = pd.DataFrame(tags_matrix, columns = list(tags), index=list(tags))
+display(tags_df)
+
+
+
+
+def Viterbi(words, train_bag = train_tagged_words):
+    state = []
+    T = list(set([pair[1] for pair in train_bag]))
+    
+    for key, word in enumerate(words):
+        #initialise list of probability column for a given observation
+        p = [] 
+        for tag in T:
+            if key == 0:
+                transition_p = tags_df.loc['.', tag]
+            else:
+                transition_p = tags_df.loc[state[-1], tag]
+                
+            # compute emission and state probabilities
+            emission_p = word_given_tag(words[key], tag)[0]/word_given_tag(words[key], tag)[1]
+            state_probability = emission_p * transition_p    
+            p.append(state_probability)
+            
+        pmax = max(p)
+        # getting state for which probability is maximum
+        state_max = T[p.index(pmax)] 
+        state.append(state_max)
+    return list(zip(words, state))
+
+
+
+
+# Let's test our Viterbi algorithm on a few sample sentences of test dataset
+random.seed(1234)      #define a random seed to get same sentences when run multiple times
+
+
+
+
+# choose random 10 numbers
+rndom = [random.randint(1,len(test_set)) for x in range(10)]
+
+
+
+# list of 10 sents on which we test the model
+test_run = [test_set[i] for i in rndom]
+
+# list of tagged words
+test_run_base = [tup for sent in test_run for tup in sent]
+
+# list of untagged words
+test_tagged_words = [tup[0] for sent in test_run for tup in sent]
+
+
+
+#################################################################################
+
+
+#Here We will only test 10 sentences to check the accuracy
+#as testing the whole training set takes huge amount of time
+
+#Code to test all the test sentences
+#(takes alot of time to run s0 we wont run it here)
+# tagging the test sentences()
+test_tagged_words = [tup[0] for sent in test_run for tup in sent]
+test_untagged_words = [tup[0] for sent in test_set for tup in sent]
+test_untagged_words
+
+
+
+
+
+start = time.time()
+tagged_seq = Viterbi(test_tagged_words)
+end = time.time()
+difference = end-start
+
+print("Time taken in seconds: ", difference)
+
+# accuracy
+check = [i for i, j in zip(tagged_seq, test_run_base) if i == j] 
+
+accuracy = len(check)/len(tagged_seq)
+print('Viterbi Algorithm Accuracy: ',accuracy*100)
+
+
+
+
+
+########################################################################3
+
+
+
+#Check how a sentence is tagged by the two POS taggers
+#and compare them
+test_sent=tag_pos['tags3'][3]
+
+
+
+pred_tags_withoutRules= Viterbi(test_sent.split())
+
+
+
+
+
+
+NLP_assgnment.py
+Displaying NLP_assgnment.py.
